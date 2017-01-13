@@ -54,9 +54,15 @@ impl Codec for HttpCodec {
     fn encode(&mut self, msg: Self::Out, buf: &mut Vec<u8>) -> io::Result<()> {
         match msg {
             Frame::Message { message, body } => {
+                buf.extend_from_slice(b"\r\n");
                 response::encode(message, buf);
             },
-            Frame::Body { chunk } => {},
+            Frame::Body { chunk } => {
+                match chunk {
+                    Some(x) => response::encode_chunk(x, buf),
+                    None => {},
+                }
+            },
             Frame::Error { error } => {},
         }
 

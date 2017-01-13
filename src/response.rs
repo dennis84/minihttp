@@ -43,9 +43,8 @@ pub fn encode(msg: Response, buf: &mut Vec<u8>) {
     write!(FastWrite(buf), "\
         HTTP/1.1 {}\r\n\
         Server: Example\r\n\
-        Content-Length: {}\r\n\
         Date: {}\r\n\
-    ", msg.status_message, length, now).unwrap();
+    ", msg.status_message, now).unwrap();
 
     for &(ref k, ref v) in &msg.headers {
         buf.extend_from_slice(k.as_bytes());
@@ -56,6 +55,11 @@ pub fn encode(msg: Response, buf: &mut Vec<u8>) {
 
     buf.extend_from_slice(b"\r\n");
     buf.extend_from_slice(msg.response.as_bytes());
+}
+
+pub fn encode_chunk(msg: String, buf: &mut Vec<u8>) {
+    buf.extend_from_slice(msg.as_bytes());
+    buf.extend_from_slice(b"\n\n");
 }
 
 // TODO: impl fmt::Write for Vec<u8>
