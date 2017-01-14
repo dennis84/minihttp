@@ -18,9 +18,9 @@ type FutureResponse = Box<Future<Item = ResponseMessage, Error = io::Error>>;
 
 fn events(remote: Remote) -> FutureResponse {
     let (tx, rx) = Body::pair();
-    let stream = tx.send(Ok("data: a".to_string()))
-        .and_then(|tx| tx.send(Ok("data: b".to_string())))
-        .and_then(|tx| tx.send(Ok("data: c".to_string())))
+    let stream = tx.send(Ok("data: a\r\n".to_string()))
+        .and_then(|tx| tx.send(Ok("data: b\r\n".to_string())))
+        .and_then(|tx| tx.send(Ok("data: c\r\n".to_string())))
         .map(|_| {()})
         .map_err(|_| ())
         .boxed();

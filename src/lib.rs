@@ -53,8 +53,12 @@ impl Codec for HttpCodec {
 
     fn encode(&mut self, msg: Self::Out, buf: &mut Vec<u8>) -> io::Result<()> {
         match msg {
-            Frame::Message { message, body } => {
-                buf.extend_from_slice(b"\r\n");
+            Frame::Message { mut message, body } => {
+                if body == false {
+                    let length = message.body.len();
+                    message.header("Content-Length", &length.to_string());
+                }
+
                 response::encode(message, buf);
             },
             Frame::Body { chunk } => {

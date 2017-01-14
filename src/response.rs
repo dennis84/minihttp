@@ -1,12 +1,12 @@
 use std::fmt::{self, Write};
 
 pub struct Response {
-    headers: Vec<(String, String)>,
-    response: String,
-    status_message: StatusMessage,
+    pub headers: Vec<(String, String)>,
+    pub body: String,
+    pub status_code: StatusCode,
 }
 
-enum StatusMessage {
+pub enum StatusCode {
     Ok,
     Custom(u32, String)
 }
@@ -15,13 +15,13 @@ impl Response {
     pub fn new() -> Response {
         Response {
             headers: Vec::new(),
-            response: String::new(),
-            status_message: StatusMessage::Ok,
+            body: String::new(),
+            status_code: StatusCode::Ok,
         }
     }
 
     pub fn status_code(&mut self, code: u32, message: &str) -> &mut Response {
-        self.status_message = StatusMessage::Custom(code, message.to_string());
+        self.status_code = StatusCode::Custom(code, message.to_string());
         self
     }
 
@@ -31,20 +31,19 @@ impl Response {
     }
 
     pub fn body(&mut self, s: &str) -> &mut Response {
-        self.response = s.to_string();
+        self.body = s.to_string();
         self
     }
 }
 
 pub fn encode(msg: Response, buf: &mut Vec<u8>) {
-    let length = msg.response.len();
     let now = ::date::now();
 
     write!(FastWrite(buf), "\
         HTTP/1.1 {}\r\n\
-        Server: Example\r\n\
+        Server: MiniHTTP\r\n\
         Date: {}\r\n\
-    ", msg.status_message, now).unwrap();
+    ", msg.status_code, now).unwrap();
 
     for &(ref k, ref v) in &msg.headers {
         buf.extend_from_slice(k.as_bytes());
@@ -54,12 +53,12 @@ pub fn encode(msg: Response, buf: &mut Vec<u8>) {
     }
 
     buf.extend_from_slice(b"\r\n");
-    buf.extend_from_slice(msg.response.as_bytes());
+    buf.extend_from_slice(msg.body.as_bytes());
 }
 
 pub fn encode_chunk(msg: String, buf: &mut Vec<u8>) {
     buf.extend_from_slice(msg.as_bytes());
-    buf.extend_from_slice(b"\n\n");
+    buf.extend_from_slice(b"\r\n");
 }
 
 // TODO: impl fmt::Write for Vec<u8>
@@ -80,11 +79,11 @@ impl<'a> fmt::Write for FastWrite<'a> {
     }
 }
 
-impl fmt::Display for StatusMessage {
+impl fmt::Display for StatusCode {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            StatusMessage::Ok => f.pad("200 OK"),
-            StatusMessage::Custom(c, ref s) => write!(f, "{} {}", c, s),
+            StatusCode::Ok => f.pad("200 OK"),
+            StatusCode::Custom(c, ref s) => write!(f, "{} {}", c, s),
         }
     }
 }

@@ -11,4 +11,6 @@ net2 = "0.2"
 time = "0.1"
 tokio-core = "0.1.0"
 tokio-proto = "0.1"
+
+[dev-dependencies]
 service-fn = { git = "https://github.com/tokio-rs/service-fn" }
