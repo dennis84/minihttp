@@ -14,3 +14,4 @@ tokio-proto = "0.1"
 
 [dev-dependencies]
 service-fn = { git = "https://github.com/tokio-rs/service-fn" }
+tokio-timer = "0.1"

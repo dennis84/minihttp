@@ -1,15 +1,19 @@
+extern crate time;
 extern crate futures;
 extern crate minihttp;
 extern crate tokio_core;
 extern crate tokio_proto;
+extern crate tokio_timer;
 extern crate service_fn;
 
 use std::io;
+use std::time::*;
 use futures::*;
 use minihttp::{Request, Response, Http};
 use tokio_core::reactor::Remote;
 use tokio_proto::streaming::{Body, Message};
 use tokio_proto::TcpServer;
+use tokio_timer::*;
 use service_fn::service_fn;
 
 type RequestMessage = Message<Request, Body<String, io::Error>>;
@@ -18,12 +22,15 @@ type FutureResponse = Box<Future<Item = ResponseMessage, Error = io::Error>>;
 
 fn events(remote: Remote) -> FutureResponse {
     let (tx, rx) = Body::pair();
-    let stream = tx.send(Ok("data: a\r\n".to_string()))
-        .and_then(|tx| tx.send(Ok("data: b\r\n".to_string())))
-        .and_then(|tx| tx.send(Ok("data: c\r\n".to_string())))
-        .map(|_| {()})
+    let timer = Timer::default();
+    let interval = timer.interval(Duration::from_millis(2000));
+    let stream = interval
         .map_err(|_| ())
-        .boxed();
+        .fold(tx, |t, _| {
+            let data = format!("data: {}\r\n", time::get_time().sec);
+            t.send(Ok(data.to_string())).map_err(|_| ())
+        })
+        .map(|_| ());
 
     remote.spawn(move |_| stream);
     let mut resp = Response::new();
