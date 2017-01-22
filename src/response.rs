@@ -58,7 +58,6 @@ pub fn encode(msg: Response, buf: &mut Vec<u8>) {
 
 pub fn encode_chunk(msg: String, buf: &mut Vec<u8>) {
     buf.extend_from_slice(msg.as_bytes());
-    buf.extend_from_slice(b"\r\n");
 }
 
 // TODO: impl fmt::Write for Vec<u8>

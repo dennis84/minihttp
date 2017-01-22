@@ -27,7 +27,7 @@ fn events(remote: Remote) -> FutureResponse {
     let stream = interval
         .map_err(|_| ())
         .fold(tx, |t, _| {
-            let data = format!("data: {}\r\n", time::get_time().sec);
+            let data = format!("data: {}\n\n", time::get_time().sec);
             t.send(Ok(data.to_string())).map_err(|_| ())
         })
         .map(|_| ());
