@@ -4,14 +4,16 @@ version = "0.1.0"
 authors = ["Dennis Dietrich <d.dietrich84@gmail.com>"]
 
 [dependencies]
-futures = "0.1.1"
-httparse = "1.1.2"
-log = "0.3.6"
+futures = "0.1"
+httparse = "1.1"
+log = "0.3"
 net2 = "0.2"
 time = "0.1"
-tokio-core = "0.1.0"
+tokio-core = "0.1"
 tokio-proto = "0.1"
 
 [dev-dependencies]
+env_logger = "0.3"
 service-fn = { git = "https://github.com/tokio-rs/service-fn" }
+tokio-service = "0.1"
 tokio-timer = "0.1"

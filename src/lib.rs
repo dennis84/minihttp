@@ -62,12 +62,13 @@ impl Codec for HttpCodec {
                 response::encode(message, buf);
             },
             Frame::Body { chunk } => {
-                match chunk {
-                    Some(x) => response::encode_chunk(x, buf),
-                    None => {},
+                if let Some(chunk) = chunk {
+                    response::encode_chunk(chunk, buf);
                 }
             },
-            Frame::Error { error } => {},
+            Frame::Error { error } => {
+                return Err(error)
+            },
         }
 
         Ok(())
