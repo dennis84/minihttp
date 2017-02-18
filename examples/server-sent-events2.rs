@@ -6,10 +6,10 @@ extern crate tokio_timer;
 extern crate tokio_service;
 
 use std::{io, thread};
-use std::time::*;
+use std::time::Duration;
 use std::sync::{Arc, Mutex};
-use futures::*;
-use futures::sync::mpsc::{channel, Sender};
+use futures::{future, Future, Sink};
+use futures::sync::mpsc::Sender;
 use minihttp::{Request, Response, Http};
 use tokio_proto::streaming::{Body, Message};
 use tokio_proto::TcpServer;
@@ -22,9 +22,9 @@ struct EventService {
 }
 
 impl Service for EventService {
-    type Request = Message<Request, Body<String, io::Error>>;
-    type Response = Message<Response, Body<String, io::Error>>;
-    type Future = Box<Future<Item = Self::Response, Error = io::Error>>;
+    type Request = Message<Request, Body<String, Self::Error>>;
+    type Response = Message<Response, Body<String, Self::Error>>;
+    type Future = Box<Future<Item = Self::Response, Error = Self::Error>>;
     type Error = io::Error;
 
     fn call(&self, _: Self::Request) -> Self::Future {
